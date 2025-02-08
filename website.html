@@ -106,22 +106,18 @@
   <div class="container">
     <!-- Text to Morse Box -->
     <div class="box">
-      <h3>Text to Morse (Auto Update)</h3>
+      <h3>Text to Morse</h3>
       <div class="input-box">
         <textarea id="inputText" placeholder="Start typing to convert to Morse..." oninput="textToMorse()"></textarea>
-        <div class="automatic-feedback" id="autoFeedbackText"></div>
       </div>
-      <div class="output-box morseBox" id="morseOutput"></div>
     </div>
 
     <!-- Morse to Text Box -->
     <div class="box">
-      <h3>Morse to Text (Auto Update)</h3>
+      <h3>Morse to Text</h3>
       <div class="input-box">
         <textarea id="inputMorse" placeholder="Start typing Morse to convert to text..." oninput="morseToText()"></textarea>
-        <div class="automatic-feedback" id="autoFeedbackMorse"></div>
       </div>
-      <div class="output-box" id="textOutput"></div>
     </div>
   </div>
 
@@ -140,55 +136,37 @@
 
     const reverseMorseCodeMap = Object.fromEntries(Object.entries(morseCodeMap).map(([k, v]) => [v, k]));
 
-    // Automatically update the Morse code translation
+    // Convert Text to Morse code
     function textToMorse() {
       const text = document.getElementById('inputText').value.toUpperCase();
       let morse = '';
-      let validInput = true;
       for (let char of text) {
         if (morseCodeMap[char]) {
           morse += morseCodeMap[char] + ' ';
         } else if (char === ' ') {
           morse += '/ ';
-        } else {
-          validInput = false;
         }
       }
-      document.getElementById('morseOutput').innerText = morse.trim();
-
-      // Provide real-time feedback for invalid characters
-      if (!validInput) {
-        document.getElementById('autoFeedbackText').innerText = 'Please enter only valid characters (A-Z, 0-9, space)';
-      } else {
-        document.getElementById('autoFeedbackText').innerText = '';
-      }
+      document.getElementById('inputMorse').value = morse.trim(); // Update Morse text area
     }
 
-    // Automatically update the Text translation from Morse code
+    // Convert Morse code to Text
     function morseToText() {
       const morse = document.getElementById('inputMorse').value.trim();
       const words = morse.split(' / ');
       let text = '';
-      let validInput = true;
       words.forEach(word => {
         word.split(' ').forEach(symbol => {
           if (reverseMorseCodeMap[symbol]) {
             text += reverseMorseCodeMap[symbol];
           } else {
-            validInput = false;
+            text += '?'; // For invalid Morse code symbols
           }
         });
         text += ' ';
       });
 
-      document.getElementById('textOutput').innerText = text.trim();
-
-      // Provide real-time feedback for invalid Morse code
-      if (!validInput) {
-        document.getElementById('autoFeedbackMorse').innerText = 'Please enter valid Morse code symbols (dots, dashes, /)';
-      } else {
-        document.getElementById('autoFeedbackMorse').innerText = '';
-      }
+      document.getElementById('inputText').value = text.trim(); // Update Text text area
     }
   </script>
 
