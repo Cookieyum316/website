@@ -75,13 +75,6 @@
       background-color: #45a049;
     }
 
-    .morseBox {
-      background: #f8f8f8;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-
     .light-container {
       position: fixed;
       top: 50%;
@@ -212,9 +205,18 @@
   <!-- Flashing Light -->
   <div id="light" class="light-container"></div>
 
-  <!-- Button to activate light display -->
+  <!-- Buttons to activate functionalities -->
   <div>
     <button id="flashButton" onclick="startFlashing()">Activate Morse Light</button>
+  </div>
+
+  <div>
+    <button id="playAudioButton" onclick="playMorseAudio()">Play Morse Code Audio</button>
+  </div>
+
+  <!-- New Button to activate both light and audio -->
+  <div>
+    <button id="activateBothButton" onclick="activateBoth()">Activate Both</button>
   </div>
 
   <!-- Progress Bar -->
@@ -233,6 +235,7 @@
         </tr>
       </thead>
       <tbody>
+        <!-- Morse code chart here -->
         <tr><td>A</td><td>.-</td></tr>
         <tr><td>B</td><td>-...</td></tr>
         <tr><td>C</td><td>-.-.</td></tr>
@@ -246,7 +249,7 @@
         <tr><td>K</td><td>-.-</td></tr>
         <tr><td>L</td><td>.-..</td></tr>
         <tr><td>M</td><td>--</td></tr>
-        <tr><td>N</td><td>-. </td></tr>
+        <tr><td>N</td><td>-.</td></tr>
         <tr><td>O</td><td>---</td></tr>
         <tr><td>P</td><td>.--.</td></tr>
         <tr><td>Q</td><td>--.-</td></tr>
@@ -274,19 +277,6 @@
         <tr><td>?</td><td>..--..</td></tr>
         <tr><td>'</td><td>.----.</td></tr>
         <tr><td>!</td><td>-.-.--</td></tr>
-        <tr><td>/</td><td>-..-.</td></tr>
-        <tr><td>(</td><td>-.--.</td></tr>
-        <tr><td>)</td><td>-.--.-</td></tr>
-        <tr><td>&</td><td>.-...</td></tr>
-        <tr><td>:</td><td>---...</td></tr>
-        <tr><td>;</td><td>-.-.-.</td></tr>
-        <tr><td>=</td><td>-...-</td></tr>
-        <tr><td>+</td><td>.-.-.</td></tr>
-        <tr><td>-</td><td>-....-</td></tr>
-        <tr><td>_</td><td>..--.-</td></tr>
-        <tr><td>"</td><td>.-..-.</td></tr>
-        <tr><td>$</td><td>...-..-</td></tr>
-        <tr><td>@</td><td>.--.-.</td></tr>
       </tbody>
     </table>
   </div>
@@ -330,73 +320,94 @@
           if (reverseMorseCodeMap[symbol]) {
             text += reverseMorseCodeMap[symbol];
           } else {
-            text += '?'; // For invalid Morse code symbols
+            text += '?'; // For invalid Morse
           }
         });
         text += ' ';
       });
-
-      document.getElementById('inputText').value = text.trim(); // Update Text text area
+      document.getElementById('inputText').value = text.trim(); // Update Text area
     }
 
-    // Function to start flashing the light based on Morse code
-    function startFlashing() {
-      const morse = document.getElementById('inputMorse').value.trim();
-      const light = document.getElementById('light');
-      const progressBar = document.getElementById('progressBar');
+    // Play Morse Code Audio
+    function playMorseAudio() {
+      const morseText = document.getElementById('inputMorse').value.trim();
       let index = 0;
 
-      // Show the light container
-      light.style.display = 'block';
+      // Function to generate audio sound for dots and dashes
+      function playSound() {
+        if (index >= morseText.length) return;
 
-      // Function to flash light
-      function flash() {
-        if (index >= morse.length) {
-          light.classList.remove('light-on');
-          return; // Stop flashing when all Morse code has been processed
-        }
-
-        const char = morse[index];
-        const morseText = document.getElementById('inputMorse');
-        
-        // Highlight the current Morse symbol
-        let currentText = morse.split('').map((c, i) => {
-          if (i === index) {
-            return `<span class="highlight">${c}</span>`; // Highlight current symbol
-          }
-          return c;
-        }).join(''); 
-        
-        morseText.innerHTML = currentText;
-
+        const char = morseText[index];
         if (char === '.') {
-          light.classList.add('light-on');
-          setTimeout(() => light.classList.remove('light-on'), 200); // Light on for a dot
+          playDotSound();
+          setTimeout(playSound, 300); // Wait 300ms for the next character
         } else if (char === '-') {
-          light.classList.add('light-on');
-          setTimeout(() => light.classList.remove('light-on'), 600); // Light on for a dash
+          playDashSound();
+          setTimeout(playSound, 700); // Wait 700ms for the next character
+        } else {
+          setTimeout(playSound, 300); // Handle spaces or pauses
         }
 
         index++;
-        const progress = (index / morse.length) * 100;
-        progressBar.style.width = `${progress}%`;
-
-        setTimeout(flash, char === '.' ? 300 : 700); // Timing for dots and dashes
       }
 
-      flash();
+      function playDotSound() {
+        const audio = new Audio('dot.wav'); // Use your custom dot sound
+        audio.play();
+      }
+
+      function playDashSound() {
+        const audio = new Audio('dash.wav'); // Use your custom dash sound
+        audio.play();
+      }
+
+      playSound();
     }
 
-    // Toggle dark mode
-    function toggleDarkMode() {
-      const darkModeToggle = document.getElementById('darkModeToggle');
-      if (darkModeToggle.checked) {
-        document.body.classList.add('dark-mode');
-      } else {
-        document.body.classList.remove('dark-mode');
+    // Flashing Light
+    function startFlashing() {
+      const light = document.getElementById('light');
+      const morseText = document.getElementById('inputMorse').value.trim();
+      let index = 0;
+
+      // Function to flash light based on Morse code
+      function flashLight() {
+        if (index >= morseText.length) return;
+
+        const char = morseText[index];
+        if (char === '.') {
+          light.classList.add('light-on');
+          setTimeout(() => {
+            light.classList.remove('light-on');
+            setTimeout(flashLight, 300); // Pause for 300ms before the next dot
+          }, 300);
+        } else if (char === '-') {
+          light.classList.add('light-on');
+          setTimeout(() => {
+            light.classList.remove('light-on');
+            setTimeout(flashLight, 700); // Pause for 700ms before the next dash
+          }, 700);
+        } else {
+          setTimeout(flashLight, 300); // Pause for space
+        }
+
+        index++;
       }
+
+      light.style.display = 'block';
+      flashLight();
+    }
+
+    // Activate Both (Light + Audio)
+    function activateBoth() {
+      playMorseAudio();
+      startFlashing();
+    }
+
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
     }
   </script>
-
 </body>
 </html>
